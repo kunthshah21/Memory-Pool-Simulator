@@ -130,8 +130,29 @@ void handle_alloc(int size) {
 
 // Placeholder implementation for free
 void handle_free(int start_address, int size) {
-    printf("Freeing %d bytes starting at address %d\n", size, start_address);
-    // TODO: Implement actual memory freeing logic
+    // Validate parameters
+    if (start_address < 0 || start_address >= MEMORY_POOL_SIZE) {
+        printf("Free failed: Start address %d is out of bounds\n", start_address);
+        return;
+    }
+    if (start_address + size > MEMORY_POOL_SIZE) {
+        printf("Free failed: Size %d goes out of bounds from start address %d\n", size, start_address);
+        return;
+    }
+
+    // Check if the block to be freed is valid
+    for (int i = start_address; i < start_address + size; i++) {
+        if (memory_pool[i] != 'X') {
+            printf("Free failed: Address %d is not part of an allocated block\n", i);
+            return;
+        }
+    }
+
+    // Free the block
+    for (int i = start_address; i < start_address + size; i++) {
+        memory_pool[i] = '-';
+    }
+    printf("Freed %d bytes starting at index %d\n", size, start_address);
 }
 
 // Placeholder implementation for print memory map
