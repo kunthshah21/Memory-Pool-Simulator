@@ -55,7 +55,6 @@ int main() {
                     printf("Invalid alloc command. Usage: alloc <size>\n");
                 }
             }
-            // Free command
             else if (strcmp(command, "free") == 0) {
                 if (sscanf(input, "free %d %d", &start_address, &size) == 2) {
                     handle_free(start_address, size);
@@ -63,28 +62,23 @@ int main() {
                     printf("Invalid free command. Usage: free <start_address> <size>\n");
                 }
             }
-            // Print map command
+           
             else if (strcmp(command, "print_map") == 0) {
                 print_memory_map();
             }
-            // Compact command
             else if (strcmp(command, "compact") == 0) {
                 compact_memory();
             }
-            // Save command
             else if (strcmp(command, "save") == 0) {
                 save_memory();
             }
-            // Load command
             else if (strcmp(command, "load") == 0) {
                 load_memory();
             }
-            // Exit command
             else if (strcmp(command, "exit") == 0) {
                 printf("Exiting Memory Pool Simulator\n");
                 break;
             }
-            // Invalid command
             else {
                 printf("Invalid command: %s\n", command);
             }
