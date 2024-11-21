@@ -192,7 +192,6 @@ void compact_memory() {
     }
 
     printf("Memory compacted.\n");
-    print_memory_map(); // Print the updated memory map after compaction
 }
 
 
