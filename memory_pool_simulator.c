@@ -131,9 +131,9 @@ void print_memory_map() {
     printf("Current Memory Map:\n");
 
     int bytes_per_line = 32;
-    for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
+    for (int i = 0; i < MEMORY_POOL_SIZE ; i++) {
         printf("%c", memory_pool[i]);
-        if ((i + 1) % bytes_per_line == 0) {
+        if ((i + 1) % 20 == 0) {
             printf("\n");
         }
     }
