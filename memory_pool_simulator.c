@@ -96,8 +96,36 @@ int main() {
 
 // Placeholder implementation for allocation
 void handle_alloc(int size) {
-    printf("Allocating %d bytes\n", size);
-    // TODO: Implement actual memory allocation logic
+    int found_start = -1; // Start index of a free block
+    int free_count = 0;   // Count of continuous free spaces
+
+    // Search for a continuous block of `size` free spaces
+    for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
+        if (memory_pool[i] == '-') {
+            if (free_count == 0) {
+                found_start = i; // Mark the start of the free block
+            }
+            free_count++;
+
+            if (free_count == size) {
+                // Found a block large enough
+                break;
+            }
+        } else {
+            // Reset if block is interrupted
+            free_count = 0;
+        }
+    }
+
+    // If a suitable block was found
+    if (free_count == size) {
+        for (int i = found_start; i < found_start + size; i++) {
+            memory_pool[i] = 'X'; // Allocate the block
+        }
+        printf("Allocated %d bytes starting at index %d\n", size, found_start);
+    } else {
+        printf("Allocation failed: Not enough continuous free space for %d bytes\n", size);
+    }
 }
 
 // Placeholder implementation for free
