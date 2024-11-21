@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define MAX_INPUT 100
-#define MEMORY_POOL_SIZE 1024
+#define MEMORY_POOL_SIZE 100
 
 // Global memory pool
 char memory_pool[MEMORY_POOL_SIZE];
