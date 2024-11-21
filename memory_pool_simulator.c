@@ -176,9 +176,25 @@ void print_memory_map() {
 
 // Placeholder implementation for memory compaction
 void compact_memory() {
-    printf("Compacting memory\n");
-    // TODO: Implement memory compaction logic
+    int write_index = 0; // Index where the next allocated block will be moved
+
+    // Iterate through the memory pool
+    for (int read_index = 0; read_index < MEMORY_POOL_SIZE; read_index++) {
+        if (memory_pool[read_index] != '-') {
+            // If the current block is allocated, move it to the `write_index`
+            memory_pool[write_index] = memory_pool[read_index];
+            // If `read_index` and `write_index` differ, mark `read_index` as free
+            if (read_index != write_index) {
+                memory_pool[read_index] = '-';
+            }
+            write_index++; // Increment the write index
+        }
+    }
+
+    printf("Memory compacted.\n");
+    print_memory_map(); // Print the updated memory map after compaction
 }
+
 
 // Placeholder implementation for saving memory
 void save_memory() {
