@@ -17,6 +17,9 @@ void save_memory();
 void load_memory();
 
 int main() {
+    // Initialize memory pool with '-'
+    memset(memory_pool, '-', MEMORY_POOL_SIZE);
+
     char input[MAX_INPUT];
     char command[20];
     int size, start_address;
@@ -106,8 +109,20 @@ void handle_free(int start_address, int size) {
 // Placeholder implementation for print memory map
 void print_memory_map() {
     printf("Current Memory Map:\n");
-    // TODO: Implement memory map visualization
-    printf("Memory map printing not yet implemented\n");
+
+    int bytes_per_line = 32; // Adjust as needed for readability
+    for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
+        printf("%c", memory_pool[i]);
+        // Add a newline every `bytes_per_line` characters
+        if ((i + 1) % bytes_per_line == 0) {
+            printf("\n");
+        }
+    }
+
+    // Add a final newline if the last line wasn't complete
+    if (MEMORY_POOL_SIZE % bytes_per_line != 0) {
+        printf("\n");
+    }
 }
 
 // Placeholder implementation for memory compaction
