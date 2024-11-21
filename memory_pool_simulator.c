@@ -5,14 +5,16 @@
 #define MAX_INPUT 100
 #define MEMORY_POOL_SIZE 100
 
+const char* filename = "memory_state.txt";
+
 char memory_pool[MEMORY_POOL_SIZE];
 
 void handle_alloc(int size);
 void handle_free(int start_address, int size);
 void print_memory_map();
 void compact_memory();
-void save_memory();
-void load_memory();
+void save_array(char* array);
+void load_array(char* array);
 
 int main() {
     memset(memory_pool, '-', MEMORY_POOL_SIZE);
@@ -58,9 +60,9 @@ int main() {
             } else if (strcmp(command, "compact") == 0) {
                 compact_memory();
             } else if (strcmp(command, "save") == 0) {
-                save_memory();
+                save_array(memory_pool);
             } else if (strcmp(command, "load") == 0) {
-                load_memory();
+                load_array(memory_pool);
             } else if (strcmp(command, "exit") == 0) {
                 printf("Exiting Memory Pool Simulator\n");
                 break;
@@ -157,10 +159,48 @@ void compact_memory() {
     printf("Memory compacted.\n");
 }
 
-void save_memory() {
-    printf("Saving memory state\n");
+// Function to save the array to a file
+void save_array(char *array) {
+    FILE *file = fopen(filename, "w");  // Open file for writing (create it if it doesn't exist)
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    // Writing each character from the array to the file
+    for (int i = 0; i < 100; i++) {
+        fprintf(file, "%c", array[i]);  // Print each character without spaces
+    }
+
+    fclose(file);
+    printf("Array saved to %s\n", filename);
 }
 
-void load_memory() {
-    printf("Loading memory state\n");
+// Function to load the array from a file
+void load_array(char *array) {
+    FILE *file = fopen(filename, "r");  // Open file for reading
+    if (file == NULL) {
+        // If the file doesn't exist, create it and initialize the array
+        printf("File not found. Creating file and initializing array.\n");
+        return;
+    }
+
+    // Reading each character from the file into the array
+    for (int i = 0; i < 100; i++) {
+        if (fscanf(file, "%c", &array[i]) != 1) {
+            perror("Error reading file");
+            fclose(file);
+            return;
+        }
+
+        // Check if the character is either 'x' or '-'
+        if (array[i] != 'X' && array[i] != '-') {
+            printf("Error: Invalid character '%c' found in file at position %d. Expected 'x' or '-'.\n", array[i], i);
+            fclose(file);
+            return;
+        }
+    }
+
+    fclose(file);
+    printf("Loading done\n");
 }
