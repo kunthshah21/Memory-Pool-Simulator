@@ -15,6 +15,8 @@ void print_memory_map();
 void compact_memory();
 void save_array(char* array);
 void load_array(char* array);
+int is_valid_allocation(int size);
+int is_valid_free(int start_address, int size);
 
 int main() {
     memset(memory_pool, '-', MEMORY_POOL_SIZE);
@@ -76,6 +78,16 @@ int main() {
 }
 
 void handle_alloc(int size) {
+    if (size <= 0 || size > MEMORY_POOL_SIZE) {
+        printf("Allocation failed: Invalid size %d. Must be between 1 and %d.\n", size, MEMORY_POOL_SIZE);
+        return;
+    }
+
+    if (!is_valid_allocation(size)) {
+        printf("Allocation failed: Not enough continuous free space for %d blocks.\n", size);
+        return;
+    }
+
     int found_start = -1;
     int free_count = 0;
 
@@ -85,7 +97,6 @@ void handle_alloc(int size) {
                 found_start = i;
             }
             free_count++;
-
             if (free_count == size) {
                 break;
             }
@@ -94,51 +105,41 @@ void handle_alloc(int size) {
         }
     }
 
-    if (free_count == size) {
-        for (int i = found_start; i < found_start + size; i++) {
-            memory_pool[i] = 'X';
-        }
-        printf("Allocated %d bytes starting at index %d\n", size, found_start);
-    } else {
-        printf("Allocation failed: Not enough continuous free space for %d bytes\n", size);
+    for (int i = found_start; i < found_start + size; i++) {
+        memory_pool[i] = 'X';
     }
+
+    printf("Allocated %d blocks starting at index %d\n", size, found_start);
 }
 
 void handle_free(int start_address, int size) {
-    if (start_address < 0 || start_address >= MEMORY_POOL_SIZE) {
-        printf("Free failed: Start address %d is out of bounds\n", start_address);
-        return;
-    }
-    if (start_address + size > MEMORY_POOL_SIZE) {
-        printf("Free failed: Size %d goes out of bounds from start address %d\n", size, start_address);
+    if (size <= 0) {
+        printf("Free failed: Invalid size %d. Size must be positive.\n", size);
         return;
     }
 
-    for (int i = start_address; i < start_address + size; i++) {
-        if (memory_pool[i] != 'X') {
-            printf("Free failed: Address %d is not part of an allocated block\n", i);
-            return;
-        }
+    if (!is_valid_free(start_address, size)) {
+        printf("Free failed: Invalid address range %d to %d.\n", start_address, start_address + size - 1);
+        return;
     }
 
     for (int i = start_address; i < start_address + size; i++) {
         memory_pool[i] = '-';
     }
-    printf("Freed %d bytes starting at index %d\n", size, start_address);
+
+    printf("Freed %d blocks starting at index %d\n", size, start_address);
 }
 
 void print_memory_map() {
     printf("Current Memory Map:\n");
 
-    int bytes_per_line = 32;
-    for (int i = 0; i < MEMORY_POOL_SIZE ; i++) {
+    for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
         printf("%c", memory_pool[i]);
         if ((i + 1) % 20 == 0) {
             printf("\n");
         }
     }
-
-    if (MEMORY_POOL_SIZE % bytes_per_line != 0) {
+    if (MEMORY_POOL_SIZE % 20 != 0) {
         printf("\n");
     }
 }
@@ -147,60 +148,76 @@ void compact_memory() {
     int write_index = 0;
 
     for (int read_index = 0; read_index < MEMORY_POOL_SIZE; read_index++) {
-        if (memory_pool[read_index] != '-') {
-            memory_pool[write_index] = memory_pool[read_index];
-            if (read_index != write_index) {
-                memory_pool[read_index] = '-';
-            }
-            write_index++;
+        if (memory_pool[read_index] == 'X') {
+            memory_pool[write_index++] = 'X';
         }
     }
 
+    for (int i = write_index; i < MEMORY_POOL_SIZE; i++) {
+        memory_pool[i] = '-';
+    }
+
     printf("Memory compacted.\n");
+    print_memory_map();
 }
 
-// Function to save the array to a file
-void save_array(char *array) {
-    FILE *file = fopen(filename, "w");  // Open file for writing (create it if it doesn't exist)
-    if (file == NULL) {
+void save_array(char* array) {
+    FILE* file = fopen(filename, "w");
+    if (!file) {
         perror("Error opening file for writing");
         return;
     }
 
-    // Writing each character from the array to the file
-    for (int i = 0; i < 100; i++) {
-        fprintf(file, "%c", array[i]);  // Print each character without spaces
-    }
-
+    fwrite(array, sizeof(char), MEMORY_POOL_SIZE, file);
     fclose(file);
-    printf("Array saved to %s\n", filename);
+
+    printf("Memory state saved to %s\n", filename);
 }
 
-// Function to load the array from a file
-void load_array(char *array) {
-    FILE *file = fopen(filename, "r");  // Open file for reading
-    if (file == NULL) {
-        // If the file doesn't exist, create it and initialize the array
-        printf("File not found. Creating file and initializing array.\n");
+void load_array(char* array) {
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        printf("Error: File %s not found.\n", filename);
         return;
     }
 
-    // Reading each character from the file into the array
-    for (int i = 0; i < 100; i++) {
-        if (fscanf(file, "%c", &array[i]) != 1) {
-            perror("Error reading file");
-            fclose(file);
-            return;
-        }
+    fread(array, sizeof(char), MEMORY_POOL_SIZE, file);
+    fclose(file);
 
-        // Check if the character is either 'x' or '-'
-        if (array[i] != 'X' && array[i] != '-') {
-            printf("Error: Invalid character '%c' found in file at position %d. Expected 'x' or '-'.\n", array[i], i);
-            fclose(file);
-            return;
+    printf("Memory state loaded from %s\n", filename);
+    print_memory_map();
+}
+
+int is_valid_allocation(int size) {
+    int free_count = 0;
+
+    for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
+        if (memory_pool[i] == '-') {
+            free_count++;
+            if (free_count == size) {
+                return 1;
+            }
+        } else {
+            free_count = 0;
         }
     }
 
-    fclose(file);
-    printf("Loading done\n");
+    return 0;
+}
+
+int is_valid_free(int start_address, int size) {
+    if (start_address < 0 || start_address >= MEMORY_POOL_SIZE) {
+        return 0;
+    }
+    if (start_address + size > MEMORY_POOL_SIZE) {
+        return 0;
+    }
+    
+    for (int i = start_address; i < start_address + size; i++) {
+        if (memory_pool[i] != 'X') {
+            return 0;
+        }
+    }
+
+    return 1;
 }
