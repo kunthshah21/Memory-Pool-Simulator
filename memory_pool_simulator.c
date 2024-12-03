@@ -133,13 +133,24 @@ void handle_free(int start_address, int size) {
 void print_memory_map() {
     printf("Current Memory Map:\n");
 
+<<<<<<< HEAD
     for (int i = 0; i < MEMORY_POOL_SIZE; i++) {
+=======
+    int bytes_per_line = 20;
+    for (int i = 0; i < MEMORY_POOL_SIZE ; i++) {
+>>>>>>> 2a8ce3e88b22401f00f3f4d593a02bc388df0ef6
         printf("%c", memory_pool[i]);
-        if ((i + 1) % 20 == 0) {
+        if ((i + 1) % bytes_per_line == 0) {
             printf("\n");
         }
     }
+<<<<<<< HEAD
     if (MEMORY_POOL_SIZE % 20 != 0) {
+=======
+
+//below if condition is not really needed, as the memory_pool will always be 100.
+    if (MEMORY_POOL_SIZE % bytes_per_line != 0) {
+>>>>>>> 2a8ce3e88b22401f00f3f4d593a02bc388df0ef6
         printf("\n");
     }
 }
@@ -168,22 +179,39 @@ void save_array(char* array) {
         return;
     }
 
+<<<<<<< HEAD
     fwrite(array, sizeof(char), MEMORY_POOL_SIZE, file);
+=======
+    // Writing each character from the array to the file
+    for (int i = 0; i < 100; i++) {
+        fprintf(file, "%c", array[i]);  // Print each character in the file without spaces
+    }
+
+>>>>>>> 2a8ce3e88b22401f00f3f4d593a02bc388df0ef6
     fclose(file);
 
     printf("Memory state saved to %s\n", filename);
 }
 
+<<<<<<< HEAD
 void load_array(char* array) {
     FILE* file = fopen(filename, "r");
     if (!file) {
         printf("Error: File %s not found.\n", filename);
+=======
+// Function to load the array from a file
+void load_array(char *array) {
+    FILE *file = fopen(filename, "r");  // Open file for reading
+    if (file == NULL) {
+        printf("File not found.\n");
+>>>>>>> 2a8ce3e88b22401f00f3f4d593a02bc388df0ef6
         return;
     }
 
     fread(array, sizeof(char), MEMORY_POOL_SIZE, file);
     fclose(file);
 
+<<<<<<< HEAD
     printf("Memory state loaded from %s\n", filename);
     print_memory_map();
 }
@@ -220,4 +248,17 @@ int is_valid_free(int start_address, int size) {
     }
 
     return 1;
+=======
+        // Check if the character is either 'x' or '-'
+        if (array[i] != 'X' && array[i] != '-') {
+            printf("Error: Invalid character '%c' found in file at position %d. Expected 'x' or '-'.\n", array[i], i);
+            fclose(file);
+            //the file reading stops, as the memory pool is corrupted, and nothing gets returned.
+            return;
+        }
+    }
+
+    fclose(file);
+    printf("Loading done\n");
+>>>>>>> 2a8ce3e88b22401f00f3f4d593a02bc388df0ef6
 }
