@@ -130,14 +130,15 @@ void handle_free(int start_address, int size) {
 void print_memory_map() {
     printf("Current Memory Map:\n");
 
-    int bytes_per_line = 32;
+    int bytes_per_line = 20;
     for (int i = 0; i < MEMORY_POOL_SIZE ; i++) {
         printf("%c", memory_pool[i]);
-        if ((i + 1) % 20 == 0) {
+        if ((i + 1) % bytes_per_line == 0) {
             printf("\n");
         }
     }
 
+//below if condition is not really needed, as the memory_pool will always be 100.
     if (MEMORY_POOL_SIZE % bytes_per_line != 0) {
         printf("\n");
     }
@@ -169,7 +170,7 @@ void save_array(char *array) {
 
     // Writing each character from the array to the file
     for (int i = 0; i < 100; i++) {
-        fprintf(file, "%c", array[i]);  // Print each character without spaces
+        fprintf(file, "%c", array[i]);  // Print each character in the file without spaces
     }
 
     fclose(file);
@@ -180,8 +181,7 @@ void save_array(char *array) {
 void load_array(char *array) {
     FILE *file = fopen(filename, "r");  // Open file for reading
     if (file == NULL) {
-        // If the file doesn't exist, create it and initialize the array
-        printf("File not found. Creating file and initializing array.\n");
+        printf("File not found.\n");
         return;
     }
 
@@ -197,6 +197,7 @@ void load_array(char *array) {
         if (array[i] != 'X' && array[i] != '-') {
             printf("Error: Invalid character '%c' found in file at position %d. Expected 'x' or '-'.\n", array[i], i);
             fclose(file);
+            //the file reading stops, as the memory pool is corrupted, and nothing gets returned.
             return;
         }
     }
