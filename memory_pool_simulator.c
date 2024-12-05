@@ -147,12 +147,14 @@ void print_memory_map() {
 void compact_memory() {
     int write_index = 0;
 
+    // Copy all non-'-' characters to the front
     for (int read_index = 0; read_index < MEMORY_POOL_SIZE; read_index++) {
-        if (memory_pool[read_index] == 'X') {
-            memory_pool[write_index++] = 'X';
+        if (memory_pool[read_index] != '-') {
+            memory_pool[write_index++] = memory_pool[read_index];
         }
     }
 
+    // Fill the remaining spaces with '-'
     for (int i = write_index; i < MEMORY_POOL_SIZE; i++) {
         memory_pool[i] = '-';
     }
