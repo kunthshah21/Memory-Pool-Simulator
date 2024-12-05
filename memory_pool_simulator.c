@@ -49,13 +49,13 @@ int main() {
                 if (sscanf(input, "alloc %d", &size) == 1) {
                     handle_alloc(size);
                 } else {
-                    printf("Invalid alloc command. Usage: alloc <size>\n");
+                    printf("Invalid alloc command");
                 }
             } else if (strcmp(command, "free") == 0) {
                 if (sscanf(input, "free %d %d", &start_address, &size) == 2) {
                     handle_free(start_address, size);
                 } else {
-                    printf("Invalid free command. Usage: free <start_address> <size>\n");
+                    printf("Invalid free command");
                 }
             } else if (strcmp(command, "print_map") == 0) {
                 print_memory_map();
@@ -77,14 +77,15 @@ int main() {
     return 0;
 }
 
+// handles memory allocation for a given size and checks if the size is valid/ enough contiguous free memory.
 void handle_alloc(int size) {
     if (size <= 0 || size > MEMORY_POOL_SIZE) {
-        printf("Allocation failed: Invalid size %d. Must be between 1 and %d.\n", size, MEMORY_POOL_SIZE);
+        printf("Invalid size %d. Must be between 1 and %d.\n", size, MEMORY_POOL_SIZE);
         return;
     }
 
     if (!is_valid_allocation(size)) {
-        printf("Allocation failed: Not enough continuous free space for %d blocks.\n", size);
+        printf("Not enough continuous free space", size);
         return;
     }
 
@@ -112,14 +113,15 @@ void handle_alloc(int size) {
     printf("Allocated %d blocks starting at index %d\n", size, found_start);
 }
 
+// handles freeing memory starting at a specified address and checks if the address and size are valid.
 void handle_free(int start_address, int size) {
     if (size <= 0) {
-        printf("Free failed: Invalid size %d. Size must be positive.\n", size);
+        printf("Invalid size %d", size);
         return;
     }
 
     if (!is_valid_free(start_address, size)) {
-        printf("Free failed: Invalid address range %d to %d.\n", start_address, start_address + size - 1);
+        printf("Invalid address range", start_address, start_address + size - 1);
         return;
     }
 
@@ -130,6 +132,7 @@ void handle_free(int start_address, int size) {
     printf("Freed %d blocks starting at index %d\n", size, start_address);
 }
 
+// prints the memory map to display allocation and free blocks.
 void print_memory_map() {
     printf("Current Memory Map:\n");
 
@@ -144,17 +147,16 @@ void print_memory_map() {
     }
 }
 
+// shifts allocated memory to the front and fills the remaining space with free blocks.
 void compact_memory() {
     int write_index = 0;
 
-    // Copy all non-'-' characters to the front
     for (int read_index = 0; read_index < MEMORY_POOL_SIZE; read_index++) {
         if (memory_pool[read_index] != '-') {
             memory_pool[write_index++] = memory_pool[read_index];
         }
     }
 
-    // Fill the remaining spaces with '-'
     for (int i = write_index; i < MEMORY_POOL_SIZE; i++) {
         memory_pool[i] = '-';
     }
@@ -163,6 +165,7 @@ void compact_memory() {
     print_memory_map();
 }
 
+// saves the current memory pool state to a file.
 void save_array(char* array) {
     FILE* file = fopen(filename, "w");
     if (!file) {
@@ -176,10 +179,11 @@ void save_array(char* array) {
     printf("Memory state saved to %s\n", filename);
 }
 
+// loads the memory pool state from a file.
 void load_array(char* array) {
     FILE* file = fopen(filename, "r");
     if (!file) {
-        printf("Error: File %s not found.\n", filename);
+        printf("File %s not found.\n", filename);
         return;
     }
 
@@ -190,6 +194,7 @@ void load_array(char* array) {
     print_memory_map();
 }
 
+// checks if there is enough contiguous free memory, returning 0 or 1. it is an edge case handler
 int is_valid_allocation(int size) {
     int free_count = 0;
 
@@ -207,6 +212,7 @@ int is_valid_allocation(int size) {
     return 0;
 }
 
+// checks if the specified range can be freed, returning 0 or 1. it is an edge case handler
 int is_valid_free(int start_address, int size) {
     if (start_address < 0 || start_address >= MEMORY_POOL_SIZE) {
         return 0;
@@ -220,6 +226,5 @@ int is_valid_free(int start_address, int size) {
             return 0;
         }
     }
-
     return 1;
 }
